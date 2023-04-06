@@ -79,7 +79,10 @@ def createVideo():
     print("Rendering final video...")
     bitrate = config["Video"]["Bitrate"]
     threads = config["Video"]["Threads"]
-    outputFile = f"{outputDir}/{fileName}.mp4" #FILENAME###############
+    safe_title = "".join([c if c.isalnum() or c.isspace() else "_" for c in script.title]) 
+    outputFile = f"{outputDir}/{safe_title}-{fileName}.mp4"  # Use the title as the filename
+
+    # outputFile = f"{outputDir}/{fileName}.mp4" 
     final.write_videofile(
         outputFile, 
         codec = 'mpeg4',
@@ -102,10 +105,32 @@ def createVideo():
 
     # Upload the video to YouTube
     video_title = script.title
-    video_description = "We dive into some of the funniest and most outrageous questions and answers from the popular AskReddit forum. Join us as we explore the weird and wonderful world of Reddit, with entertaining and meme-worthy moments guaranteed"
-    video_tags = ["Reddit", "AskReddit", "AMA", "Entertainment", "Comedy", "Humor", "Memes", "Funny", "Laugh", "Viral"]
-    video_category_id = "22"  # Entertainment category
 
+    # Randomize video description   
+    descriptions = [
+        "We dive into some of the funniest and most outrageous questions and answers from the popular AskReddit forum. Join us as we explore the weird and wonderful world of Reddit, with entertaining and meme-worthy moments guaranteed",
+        "Join us for a wild ride through the best of AskReddit as we uncover hilarious, bizarre, and downright entertaining questions and answers. Be prepared for a rollercoaster of emotions and lots of laughter!",
+        "Experience the most entertaining and hilarious moments from AskReddit as we dive into the world of funny questions and outrageous answers. Get ready for a journey full of laughs and unforgettable stories!",
+        "Welcome to our latest Reddit Ask video, where we dive into some of the most bizarre, funny, and downright ridiculous questions and answers from the popular AskReddit forum. ",
+        "Join us for our latest Reddit Ask video, where we explore some of the most outrageous and hilarious questions and answers from the AskReddit community. From memes to viral content, we've got it all, so sit back, relax, and get ready to laugh!",
+        "In this inspiring short story-telling video, we hear from people who have overcome incredible challenges and gone on to achieve amazing things. Their stories of perseverance and determination will leave you feeling motivated and ready to tackle your own challenges."
+
+    ]
+    video_description = random.choice(descriptions)
+
+    # Randomize video tags
+    all_tags = ["Reddit", "AskReddit", "AMA", "Entertainment", "Comedy", "Humor", "Memes", "Funny", "Laugh", "Viral", "Storytelling", "ShortStories", "TrueStories", "Animation", "Narrated", "Inspiration", "Motivation", "Heartwarming", "Emotional" , "Memes", "MemeWorthy"]
+
+
+    num_tags_to_select = random.randint(5, len(all_tags))
+    video_tags = random.sample(all_tags, num_tags_to_select)
+
+
+    # video_description = "We dive into some of the funniest and most outrageous questions and answers from the popular AskReddit forum. Join us as we explore the weird and wonderful world of Reddit, with entertaining and meme-worthy moments guaranteed"
+    # video_tags = ["Reddit", "AskReddit", "AMA", "Entertainment", "Comedy", "Humor", "Memes", "Funny", "Laugh", "Viral"]
+
+
+    video_category_id = "22"  # Entertainment category
     upload_video(outputFile, video_title, video_description, video_tags, video_category_id)
 
 if __name__ == "__main__":

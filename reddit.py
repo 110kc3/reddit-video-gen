@@ -1,5 +1,6 @@
 import os, re, praw, markdown_to_text, time
 from videoscript import VideoScript
+import random
 
 redditUrl = "https://www.reddit.com/"
 
@@ -11,7 +12,7 @@ def getContent(outputDir, postOptionCount) -> VideoScript:
     autoSelect = postOptionCount == 0
     posts = []
 
-    for submission in reddit.subreddit("askreddit").top(time_filter="week", limit=postOptionCount*3):
+    for submission in reddit.subreddit("askreddit").top(time_filter="month", limit=postOptionCount*3):
         if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
             continue
         hoursAgoPosted = (now - submission.created_utc) / 3600
@@ -27,9 +28,11 @@ def getContent(outputDir, postOptionCount) -> VideoScript:
         selectedPost = posts[postSelection]
         return __getContentFromPost(selectedPost)
 
+
 def getContentFromId(outputDir, submissionId) -> VideoScript:
     reddit = __getReddit()
     existingPostIds = __getExistingPostIds(outputDir)
+    print(existingPostIds)
     
     if (submissionId in existingPostIds):
         print("Video already exists!")
@@ -65,6 +68,7 @@ def __getContentFromPost(submission) -> VideoScript:
             break
     return content
 
+# function retrieves a list of existing post IDs from the outputDir (output directory) where the videos are stored
 def __getExistingPostIds(outputDir):
     files = os.listdir(outputDir)
     # I'm sure anyone knowledgable on python hates this. I had some weird 
