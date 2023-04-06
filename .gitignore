@@ -9,6 +9,5 @@ metadata.json
 pyvenv.cfg
 client_secrets.json
 geckodriver.log
-config.ini
 authorized_user.json
 client_secrets_desktop.json
