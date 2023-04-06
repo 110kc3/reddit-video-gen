@@ -60,8 +60,8 @@ def getPostScreenshots(filePrefix, script):
     print("Taking screenshots...")
     driver, wait = __setupDriver(script.url)
 
-    # Close the Google login popup if present
-    close_google_login_popup(driver, wait)
+    # Close the Google login popup if present - not required in most of the cases, commented for now
+    # close_google_login_popup(driver, wait)
 
     # Accept cookies before taking screenshots
     accept_cookies(driver, wait)

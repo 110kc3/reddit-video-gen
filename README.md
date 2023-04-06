@@ -12,6 +12,15 @@ you can run `python main.py <reddit-post-id>` to create a video for a specific p
 
 
 
+
+There are some issues with libraries:
+
+fix:
+
+python -m pip install -r requirements2.txt
+
+
+
 YT authentication:
 
 python authorize_youtube.py
@@ -23,7 +32,11 @@ TODO:
 
 change structure of the files
 
-implement auto yt upload
+implement automatic video chosing
+
+add tags to video tittle, 
+
+randomize video description and tags
 
 check how to move to linux vm - headless setup
 
