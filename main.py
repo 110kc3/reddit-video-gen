@@ -12,11 +12,24 @@ def createVideo():
 
     # Get script from reddit
     # If a post id is listed, use that. Otherwise query top posts
+    # if (len(sys.argv) == 2):
+    #     script = reddit.getContentFromId(outputDir, sys.argv[1])
+    # else:
+    #     postOptionCount = int(config["Reddit"]["NumberOfPostsToSelectFrom"])
+    #     script = reddit.getContent(outputDir, postOptionCount)
+    # If a post id is listed, use that. Otherwise query top posts
+
+
     if (len(sys.argv) == 2):
         script = reddit.getContentFromId(outputDir, sys.argv[1])
     else:
         postOptionCount = int(config["Reddit"]["NumberOfPostsToSelectFrom"])
-        script = reddit.getContent(outputDir, postOptionCount)
+        auto_select = config.getboolean("Reddit", "AutoSelectPost")
+        subreddit_name = config["Reddit"]["Subreddit"]
+        time_filter = config["Reddit"]["TimeFilter"]
+        script = reddit.getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter)
+
+        # script = reddit.getContent(outputDir, postOptionCount, auto_select)
     fileName = script.getFileName()
 
     # Create screenshots

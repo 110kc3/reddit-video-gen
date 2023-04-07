@@ -4,36 +4,102 @@ import random
 
 redditUrl = "https://www.reddit.com/"
 
-def getContent(outputDir, postOptionCount) -> VideoScript:
+# def getContent(outputDir, postOptionCount) -> VideoScript:
+#     reddit = __getReddit()
+#     existingPostIds = __getExistingPostIds(outputDir)
+
+#     now = int( time.time() )
+#     autoSelect = postOptionCount == 0
+#     posts = []
+
+#     for submission in reddit.subreddit("askreddit").top(time_filter="week", limit=postOptionCount*3):
+#         if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
+#             continue
+#         hoursAgoPosted = (now - submission.created_utc) / 3600
+#         print(f"[{len(posts)}] {submission.title}     {submission.score}    {'{:.1f}'.format(hoursAgoPosted)} hours ago")
+#         posts.append(submission)
+#         if (autoSelect or len(posts) >= postOptionCount):
+#             break
+
+#     if (autoSelect):
+#         return __getContentFromPost(posts[0])
+#     else:
+#         postSelection = int(input("Input :"))
+#         selectedPost = posts[postSelection]
+#         return __getContentFromPost(selectedPost)
+
+
+#  old for getting posts
+# def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
+#     reddit = __getReddit()
+#     existingPostIds = __getExistingPostIds(outputDir)
+
+#     now = int(time.time())
+#     autoSelect = auto_select or postOptionCount == 0
+
+#     posts = []
+
+#     for submission in reddit.subreddit(subreddit_name).top(time_filter=time_filter, limit=postOptionCount * 3):
+#         if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
+#             continue
+#         hoursAgoPosted = (now - submission.created_utc) / 3600
+#         print(f"[{len(posts)}] {submission.title}     {submission.score}    {'{:.1f}'.format(hoursAgoPosted)} hours ago")
+#         posts.append(submission)
+
+
+def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
     reddit = __getReddit()
     existingPostIds = __getExistingPostIds(outputDir)
 
-    now = int( time.time() )
-    autoSelect = postOptionCount == 0
+    now = int(time.time())
+    autoSelect = auto_select or postOptionCount == 0
+
     posts = []
+    fetched_posts = []
+    while len(posts) < postOptionCount:
+        for submission in reddit.subreddit(subreddit_name).top(time_filter=time_filter, limit=postOptionCount * 3, params={"after": fetched_posts[-1].fullname if fetched_posts else None}):
+            fetched_posts.append(submission)
+            if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
+                continue
+            hoursAgoPosted = (now - submission.created_utc) / 3600
+            print(f"[{len(posts)}] {submission.title}     {submission.score}    {'{:.1f}'.format(hoursAgoPosted)} hours ago")
+            posts.append(submission)
+            if len(posts) >= postOptionCount:
+                break
 
-    for submission in reddit.subreddit("askreddit").top(time_filter="month", limit=postOptionCount*3):
-        if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
-            continue
-        hoursAgoPosted = (now - submission.created_utc) / 3600
-        print(f"[{len(posts)}] {submission.title}     {submission.score}    {'{:.1f}'.format(hoursAgoPosted)} hours ago")
-        posts.append(submission)
-        if (autoSelect or len(posts) >= postOptionCount):
-            break
+    available_posts = [post for post in posts if post.id not in existingPostIds]
 
-    if (autoSelect):
-        return __getContentFromPost(posts[0])
+    if not available_posts:
+        print("No available posts found!")
+        exit()
+
+    if autoSelect:
+        selectedPost = available_posts[0]
     else:
-        postSelection = int(input("Input :"))
-        selectedPost = posts[postSelection]
-        return __getContentFromPost(selectedPost)
+        while True:
+            postSelection = int(input("Input :"))
+            if postSelection < len(posts) and posts[postSelection].id not in existingPostIds:
+                selectedPost = posts[postSelection]
+                break
+            else:
+                print("Invalid selection or video already exists. Please try again.")
+
+    return __getContentFromPost(selectedPost)
+
+
+
+
+
 
 
 def getContentFromId(outputDir, submissionId) -> VideoScript:
     reddit = __getReddit()
+    # print("getting existing posts ids:")
     existingPostIds = __getExistingPostIds(outputDir)
-    print(existingPostIds)
-    
+    # print(existingPostIds)
+
+    # print("printing submissions IDs")
+    # print(submissionId)
     if (submissionId in existingPostIds):
         print("Video already exists!")
         exit()
@@ -71,7 +137,9 @@ def __getContentFromPost(submission) -> VideoScript:
 # function retrieves a list of existing post IDs from the outputDir (output directory) where the videos are stored
 def __getExistingPostIds(outputDir):
     files = os.listdir(outputDir)
-    # I'm sure anyone knowledgable on python hates this. I had some weird 
-    # issues and frankly didn't care to troubleshoot. It works though...
-    files = [f for f in files if os.path.isfile(outputDir+'/'+f)]
-    return [re.sub(r'.*?-', '', file) for file in files]
+
+    files = [f for f in files if os.path.isfile(os.path.join(outputDir, f))]
+    post_ids = [re.sub(r'.*?-', '', file) for file in files]
+    post_ids_without_ext = [os.path.splitext(post_id)[0] for post_id in post_ids] # returning the post IDs with the '.mp4' extension
+    return post_ids_without_ext
+

@@ -30,6 +30,14 @@ This will open a new browser window asking you to authorize the application. Onc
 
 TODO:
 
+
+
+Checking if the same video already exists
+
+
+
+
+
 change structure of the files
 
 implement automatic video chosing
