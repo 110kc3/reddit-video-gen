@@ -2,6 +2,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googleapiclient.http import MediaFileUpload
+import sys 
 
 def upload_video(file_path, title, description, tags, category_id):
     try:

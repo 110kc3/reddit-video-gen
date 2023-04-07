@@ -28,6 +28,45 @@ python authorize_youtube.py
 This will open a new browser window asking you to authorize the application. Once you do that, it will create an authorized_user.json file containing the necessary fields (refresh_token, client_id, client_secret).
 
 
+
+
+AWS user creation with user policy:
++ need to add AmazonPollyFullAccess policy
+
+Sign in to the AWS Management Console and open the IAM console at https://console.aws.amazon.com/iam/.
+In the navigation pane, click on "Policies" and then click the "Create policy" button.
+In the "Create policy" page, click the "JSON" tab and replace the existing content with the sample policy provided above.
+Click the "Review policy" button, give your policy a name (e.g., "S3VideoBucketAccess"), and click "Create policy".
+In the navigation pane, click on "Users" and find your polly-script-bot user.
+Click on the user name to open the user details page. In the "Permissions" tab, click on the "Add permissions" button and then click on "Attach existing policies directly".
+In the search box, type the name of the policy you just created (e.g., "S3VideoBucketAccess") and select the checkbox next to it. Click on the "Attach policy" button to attach the policy to your polly-script-bot user.
+
+
+
+IAM policy should look like this:
+
+
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "arm bucket name"
+        }
+    ]
+}
+
+
+
+
+
+
+
 TODO:
 
 
