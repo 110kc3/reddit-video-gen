@@ -1,50 +1,9 @@
 import os, re, praw, markdown_to_text, time
 from videoscript import VideoScript
 import random
+from praw.models import MoreComments
 
 redditUrl = "https://www.reddit.com/"
-
-# def getContent(outputDir, postOptionCount) -> VideoScript:
-#     reddit = __getReddit()
-#     existingPostIds = __getExistingPostIds(outputDir)
-
-#     now = int( time.time() )
-#     autoSelect = postOptionCount == 0
-#     posts = []
-
-#     for submission in reddit.subreddit("askreddit").top(time_filter="week", limit=postOptionCount*3):
-#         if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
-#             continue
-#         hoursAgoPosted = (now - submission.created_utc) / 3600
-#         print(f"[{len(posts)}] {submission.title}     {submission.score}    {'{:.1f}'.format(hoursAgoPosted)} hours ago")
-#         posts.append(submission)
-#         if (autoSelect or len(posts) >= postOptionCount):
-#             break
-
-#     if (autoSelect):
-#         return __getContentFromPost(posts[0])
-#     else:
-#         postSelection = int(input("Input :"))
-#         selectedPost = posts[postSelection]
-#         return __getContentFromPost(selectedPost)
-
-
-#  old for getting posts
-# def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
-#     reddit = __getReddit()
-#     existingPostIds = __getExistingPostIds(outputDir)
-
-#     now = int(time.time())
-#     autoSelect = auto_select or postOptionCount == 0
-
-#     posts = []
-
-#     for submission in reddit.subreddit(subreddit_name).top(time_filter=time_filter, limit=postOptionCount * 3):
-#         if (f"{submission.id}.mp4" in existingPostIds or submission.over_18):
-#             continue
-#         hoursAgoPosted = (now - submission.created_utc) / 3600
-#         print(f"[{len(posts)}] {submission.title}     {submission.score}    {'{:.1f}'.format(hoursAgoPosted)} hours ago")
-#         posts.append(submission)
 
 
 def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
@@ -88,10 +47,6 @@ def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_fil
 
 
 
-
-
-
-
 def getContentFromId(outputDir, submissionId) -> VideoScript:
     reddit = __getReddit()
     # print("getting existing posts ids:")
@@ -128,11 +83,14 @@ def __getContentFromPost(submission) -> VideoScript:
 
     failedAttempts = 0
     for comment in submission.comments:
-        if(content.addCommentScene(markdown_to_text.markdown_to_text(comment.body), comment.id)):
+        if isinstance(comment, MoreComments):
+            continue
+        if(content.addCommentScene(markdown_to_text.markdown_to_text(comment.body), comment.id, comment.author.name if comment.author is not None else "[deleted]")):
             failedAttempts += 1
         if (content.canQuickFinish() or (failedAttempts > 2 and content.canBeFinished())):
             break
     return content
+
 
 # function retrieves a list of existing post IDs from the outputDir (output directory) where the videos are stored
 def __getExistingPostIds(outputDir):

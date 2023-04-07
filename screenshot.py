@@ -4,6 +4,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import time
+from selenium.common.exceptions import NoSuchElementException
 
 # Config
 screenshotDir = "Screenshots"
@@ -13,13 +14,38 @@ screenHeight = 800
 
 
 #  check for a Google login popup and close it before proceeding
+# def close_google_login_popup(driver, wait):
+#     try:
+#         # Wait for a few seconds before attempting to locate the close button
+#         time.sleep(5)
+#         # Locate the close button using its class name with an increased timeout
+#         close_button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'svg.Bz112c.Bz112c-r9oPif')))
+#         close_button.click()
+#     except TimeoutException:
+#         print("Could not find the Google login popup close button or it took too long to load.")
+#         pass
+
+
+
 def close_google_login_popup(driver, wait):
     try:
         # Wait for a few seconds before attempting to locate the close button
         time.sleep(5)
-        # Locate the close button using its class name with an increased timeout
-        close_button = WebDriverWait(driver, 20).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'svg.Bz112c.Bz112c-r9oPif')))
-        close_button.click()
+
+        # Locate the SVG element using the 'svg' tag with an increased timeout
+        svg_elements = WebDriverWait(driver, 5).until(EC.presence_of_all_elements_located((By.TAG_NAME, 'svg')))
+
+        # Check if the 'd' attribute of the first path element inside the SVG matches the desired value
+        target_d_value = "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+        for svg in svg_elements:
+            try:
+                path = svg.find_element(By.TAG_NAME, 'path')
+                if path.get_attribute('d') == target_d_value:
+                    svg.click()
+                    break
+            except NoSuchElementException:
+                continue
+
     except TimeoutException:
         print("Could not find the Google login popup close button or it took too long to load.")
         pass
@@ -54,26 +80,45 @@ def enable_dark_mode(driver, wait):
         print("Could not find the required elements or they took too long to load.")
         pass
 
-
-
 def getPostScreenshots(filePrefix, script):
     print("Taking screenshots...")
     driver, wait = __setupDriver(script.url)
 
-    # Close the Google login popup if present - not required in most of the cases, commented for now
-    # close_google_login_popup(driver, wait)
+    # Close the Google login popup if present - not required in most of the cases
+    close_google_login_popup(driver, wait)
 
     # Accept cookies before taking screenshots
     accept_cookies(driver, wait)
-    # accept_cookies(driver, wait)
 
     # Enable dark mode
     enable_dark_mode(driver, wait)
 
     script.titleSCFile = __takeScreenshot(filePrefix, driver, wait)
     for commentFrame in script.frames:
-        commentFrame.screenShotFile = __takeScreenshot(filePrefix, driver, wait, f"t1_{commentFrame.commentId}")
+        # Check if the author of the comment is not [deleted]
+        if commentFrame.author != "[deleted]":
+            commentFrame.screenShotFile = __takeScreenshot(filePrefix, driver, wait, f"t1_{commentFrame.commentId}")
     driver.quit()
+
+
+# def getPostScreenshots(filePrefix, script):
+#     print("Taking screenshots...")
+#     driver, wait = __setupDriver(script.url)
+
+#     # Close the Google login popup if present - not required in most of the cases, commented for now
+#     # close_google_login_popup(driver, wait)
+
+#     # Accept cookies before taking screenshots
+#     accept_cookies(driver, wait)
+#     # accept_cookies(driver, wait)
+
+#     # Enable dark mode
+#     enable_dark_mode(driver, wait)
+
+#     script.titleSCFile = __takeScreenshot(filePrefix, driver, wait)
+#     for commentFrame in script.frames:
+#         commentFrame.screenShotFile = __takeScreenshot(filePrefix, driver, wait, f"t1_{commentFrame.commentId}")
+#     driver.quit()
 
 def __takeScreenshot(filePrefix, driver, wait, handle="Post"):
     method = By.CLASS_NAME if (handle == "Post") else By.ID

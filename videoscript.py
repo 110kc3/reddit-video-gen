@@ -27,11 +27,11 @@ class VideoScript:
     def canQuickFinish(self) -> bool:
         return (len(self.frames) >= MIN_COMMENTS_FOR_FINISH) and (self.totalDuration > MIN_DURATION)
 
-    def addCommentScene(self, text, commentId) -> None:
+    def addCommentScene(self, text, commentId, author) -> None:
         wordCount = len(text.split())
         if (wordCount > MAX_WORDS_PER_COMMENT):
             return True
-        frame = ScreenshotScene(text, commentId)
+        frame = ScreenshotScene(text, commentId, author)
         frame.audioClip = self.__createVoiceOver(commentId, text)
         if (frame.audioClip == None):
             return True
@@ -56,7 +56,9 @@ class ScreenshotScene:
     text = ""
     screenShotFile = ""
     commentId = ""
+    author = ""  #this is needed for check for [deleted] users
 
-    def __init__(self, text, commentId) -> None:
+    def __init__(self, text, commentId, author) -> None:
         self.text = text
         self.commentId = commentId
+        self.author = author  

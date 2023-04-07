@@ -57,6 +57,8 @@ def createVideo():
     w, h = backgroundVideo.size
 
     def __createClip(screenShotFile, audioClip, marginSize):
+        print(f"Creating clip for: {screenShotFile}")  # Add this line to print the file path
+
         imageClip = ImageClip(
             screenShotFile,
             duration=audioClip.duration
@@ -70,9 +72,11 @@ def createVideo():
     print("Editing clips together...")
     clips = []
     marginSize = int(config["Video"]["MarginSize"])
+
     clips.append(__createClip(script.titleSCFile, script.titleAudioClip, marginSize))
     for comment in script.frames:
-        clips.append(__createClip(comment.screenShotFile, comment.audioClip, marginSize))
+        if comment.screenShotFile:  # Add this line to check if the file path is not empty
+            clips.append(__createClip(comment.screenShotFile, comment.audioClip, marginSize))
 
     # Merge clips into single track
     contentOverlay = concatenate_videoclips(clips).set_position(("center", "center"))
@@ -127,21 +131,14 @@ def createVideo():
         "Welcome to our latest Reddit Ask video, where we dive into some of the most bizarre, funny, and downright ridiculous questions and answers from the popular AskReddit forum. ",
         "Join us for our latest Reddit Ask video, where we explore some of the most outrageous and hilarious questions and answers from the AskReddit community. From memes to viral content, we've got it all, so sit back, relax, and get ready to laugh!",
         "In this inspiring short story-telling video, we hear from people who have overcome incredible challenges and gone on to achieve amazing things. Their stories of perseverance and determination will leave you feeling motivated and ready to tackle your own challenges."
-
     ]
     video_description = random.choice(descriptions)
 
     # Randomize video tags
     all_tags = ["Reddit", "AskReddit", "AMA", "Entertainment", "Comedy", "Humor", "Memes", "Funny", "Laugh", "Viral", "Storytelling", "ShortStories", "TrueStories", "Animation", "Narrated", "Inspiration", "Motivation", "Heartwarming", "Emotional" , "Memes", "MemeWorthy"]
 
-
     num_tags_to_select = random.randint(5, len(all_tags))
     video_tags = random.sample(all_tags, num_tags_to_select)
-
-
-    # video_description = "We dive into some of the funniest and most outrageous questions and answers from the popular AskReddit forum. Join us as we explore the weird and wonderful world of Reddit, with entertaining and meme-worthy moments guaranteed"
-    # video_tags = ["Reddit", "AskReddit", "AMA", "Entertainment", "Comedy", "Humor", "Memes", "Funny", "Laugh", "Viral"]
-
 
     video_category_id = "22"  # Entertainment category
     upload_video(outputFile, video_title, video_description, video_tags, video_category_id)
