@@ -4,7 +4,8 @@ OutputVideos/*
 Screenshots/*
 Voiceovers/*
 Lib/*
-Scripts/*
+Scripts/tiktok
+
 metadata.json
 pyvenv.cfg
 client_secrets.json
@@ -12,3 +13,4 @@ geckodriver.log
 authorized_user.json
 client_secrets_desktop.json
 tiktok/tiktok.ini
+Secrets/*
