@@ -69,12 +69,29 @@ IAM policy should look like this:
 
 TODO:
 
+Change storage of the files:
+- move finished files to specific folder
+- have all video files on S3 bucket
 
+auto facebook upload
+
+
+check how to move to linux vm - headless setup
+
+
+
+Finish opacity of screenshots
+
+Create some process to choose/download background videos - maybe have ai choose specific video based on video title 
+
+FUTURE TODO:
+
+auto tiktok upload - kinda difficult - would need separate page deployed for authentication
+
+
+DONE:
 
 Checking if the same video already exists
-
-
-
 
 
 change structure of the files
@@ -85,8 +102,4 @@ add tags to video tittle,
 
 randomize video description and tags
 
-check how to move to linux vm - headless setup
-
-
-auto tiktok upload
 

@@ -12,21 +12,6 @@ screenWidth = 400
 screenHeight = 800
 
 
-
-#  check for a Google login popup and close it before proceeding
-# def close_google_login_popup(driver, wait):
-#     try:
-#         # Wait for a few seconds before attempting to locate the close button
-#         time.sleep(5)
-#         # Locate the close button using its class name with an increased timeout
-#         close_button = WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, 'svg.Bz112c.Bz112c-r9oPif')))
-#         close_button.click()
-#     except TimeoutException:
-#         print("Could not find the Google login popup close button or it took too long to load.")
-#         pass
-
-
-
 def close_google_login_popup(driver, wait):
     try:
         # Wait for a few seconds before attempting to locate the close button
@@ -50,7 +35,6 @@ def close_google_login_popup(driver, wait):
         print("Could not find the Google login popup close button or it took too long to load.")
         pass
 
-
 def accept_cookies(driver, wait):
     try:
         # Replace 'cookie_accept_button_selector' with the actual selector of the button
@@ -60,7 +44,6 @@ def accept_cookies(driver, wait):
         print("Could not find the cookie accept button or it took too long to load.")
         
         pass
-
 
 
 
@@ -100,31 +83,28 @@ def getPostScreenshots(filePrefix, script):
             commentFrame.screenShotFile = __takeScreenshot(filePrefix, driver, wait, f"t1_{commentFrame.commentId}")
     driver.quit()
 
+def __add_opacity(driver, element, opacity=0.2, color='255, 255, 255'):
+    script = f"""
+    var overlay = document.createElement('div');
+    overlay.style.position = 'absolute';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100%';
+    overlay.style.height = '100%';
+    overlay.style.backgroundColor = 'rgba({color}, {opacity})';
+    arguments[0].appendChild(overlay);
+    """
+    driver.execute_script(script, element)
 
-# def getPostScreenshots(filePrefix, script):
-#     print("Taking screenshots...")
-#     driver, wait = __setupDriver(script.url)
-
-#     # Close the Google login popup if present - not required in most of the cases, commented for now
-#     # close_google_login_popup(driver, wait)
-
-#     # Accept cookies before taking screenshots
-#     accept_cookies(driver, wait)
-#     # accept_cookies(driver, wait)
-
-#     # Enable dark mode
-#     enable_dark_mode(driver, wait)
-
-#     script.titleSCFile = __takeScreenshot(filePrefix, driver, wait)
-#     for commentFrame in script.frames:
-#         commentFrame.screenShotFile = __takeScreenshot(filePrefix, driver, wait, f"t1_{commentFrame.commentId}")
-#     driver.quit()
 
 def __takeScreenshot(filePrefix, driver, wait, handle="Post"):
     method = By.CLASS_NAME if (handle == "Post") else By.ID
     search = wait.until(EC.presence_of_element_located((method, handle)))
     driver.execute_script("window.focus();")
 
+    # Add opacity to the element before taking the screenshot - this has some color issues, commented for now
+    # __add_opacity(driver, search, opacity=0.8)
+  
     fileName = f"{screenshotDir}/{filePrefix}-{handle}.png"
     fp = open(fileName, "wb")
     fp.write(search.screenshot_as_png)

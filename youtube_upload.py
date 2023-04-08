@@ -5,9 +5,23 @@ from googleapiclient.http import MediaFileUpload
 import sys 
 
 def upload_video(file_path, title, description, tags, category_id):
+    # Truncate the title if it's longer than 100 characters
+    if len(title) > 100:
+        title = title[:96] + "..."
+
     try:
         credentials = Credentials.from_authorized_user_file('authorized_user.json', ['https://www.googleapis.com/auth/youtube.upload'])
         youtube = build('youtube', 'v3', credentials=credentials)
+
+        # Convert the tags list to a single string with tags prepended with '#' and separated by spaces
+        tags_str = " ".join([f"#{tag}" for tag in tags])
+
+        # Add the tags string to the end of the description
+        description += f"\n\n{tags_str}"
+        # Truncate the description if it's longer than 4500 characters (max 5k in yt)
+        if len(description) > 4500:
+            description = description[:4450] + "..."
+
 
         body = {
             'snippet': {
