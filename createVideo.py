@@ -1,4 +1,6 @@
 from moviepy.editor import *
+import shutil
+import os
 
 import reddit, screenshot, time, subprocess, random, configparser, sys, math
 from youtube_upload import upload_video
@@ -32,7 +34,13 @@ def createVideo():
     bgDir = config["General"]["BackgroundDirectory"]
     bgPrefix = config["General"]["BackgroundFilePrefix"]
     bgCount = int(config["General"]["BackgroundVideos"])
-    bgIndex = random.randint(0, bgCount-1)
+    # Randomize bgIndex until the video file exists
+    bgIndex=None
+    backgroundVideo = None
+    while not os.path.exists(f"{bgDir}/{bgPrefix}{bgIndex}.mp4"):
+        bgIndex = random.randint(0, bgCount-1)
+
+    # bgIndex = random.randint(0, bgCount-1)
 
     # Setup background clip and loop the video if it's too short
     voiceover_duration = script.getDuration()
@@ -96,6 +104,7 @@ def createVideo():
     )
     print(f"Video completed in {time.time() - startTime}")
 
+
     # Preview in VLC for approval before uploading
     if (config["General"].getboolean("PreviewBeforeUpload")):
         vlcPath = config["General"]["VLCPath"]
@@ -136,8 +145,56 @@ def createVideo():
     
     num_tags_to_select = random.randint(12, len(all_tags))
     video_tags = random.sample(all_tags, num_tags_to_select - 1)  # Subtract 1 to account for the Shorts tag
+    video_tags = validate_tags(video_tags)
+
     video_tags.append("Shorts")  # Add the Shorts tag back to the list of random tags
     
 
     video_category_id = "22"  # Entertainment category
+    print("Starting video upload to YT")
     upload_video(outputFile, video_title, video_description, video_tags, video_category_id)
+    print("Starting cleanup")
+    backgroundVideo.close()
+
+    # after the video is uploaded
+    used_yt_dir = f"{outputDir}/used_yt"  
+    used_backgroundvideo_dir = f"{bgDir}/used"
+
+   
+    # Move the output video to the "used_yt" folder
+    try:
+        # shutil.move(outputFile, f"{used_yt_dir}/{safe_title}-{fileName}.mp4")
+        unique_output_file = generate_unique_filename(used_yt_dir, f"{safe_title}-{fileName}.mp4")
+        shutil.move(outputFile, os.path.join(used_yt_dir, unique_output_file))
+
+    except Exception as e:
+        print(f"An error occurred while moving the output video: {e}")
+
+    # Move the background video to the "used" folder
+    try:
+        # Move the background video to the "used" folder
+        unique_background_file = generate_unique_filename(used_backgroundvideo_dir, f"{bgPrefix}{bgIndex}.mp4")
+        shutil.move(f"{bgDir}/{bgPrefix}{bgIndex}.mp4", os.path.join(used_backgroundvideo_dir, unique_background_file))
+    except Exception as e:
+        print(f"An error occurred while moving the background video: {e}")
+
+
+def generate_unique_filename(destination, filename):
+    if os.path.exists(os.path.join(destination, filename)):
+        base, ext = os.path.splitext(filename)
+        filename = f"{base}_1{ext}"
+    return filename
+
+def validate_tags(tags):
+    MAX_TAG_LENGTH = 30
+    MAX_TAGS_LENGTH = 450
+
+    valid_tags = []
+    total_tags_length = 0
+
+    for tag in tags:
+        if len(tag) <= MAX_TAG_LENGTH and (total_tags_length + len(tag) + 1) <= MAX_TAGS_LENGTH:
+            valid_tags.append(tag)
+            total_tags_length += len(tag) + 1
+
+    return valid_tags

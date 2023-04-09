@@ -43,6 +43,7 @@ def upload_video(file_path, title, description, tags, category_id):
             )
             response = request.execute()
 
+
         print(f"Video uploaded to YouTube with video ID: {response['id']}")
     except HttpError as e:
         print(f"An error occurred: {e}")

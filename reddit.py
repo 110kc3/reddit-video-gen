@@ -8,7 +8,11 @@ redditUrl = "https://www.reddit.com/"
 
 def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
     reddit = __getReddit()
-    existingPostIds = __getExistingPostIds(outputDir)
+    # existingPostIds = __getExistingPostIds(outputDir)
+    # In getContent()
+    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt")])
+
+
 
     now = int(time.time())
     autoSelect = auto_select or postOptionCount == 0
@@ -50,7 +54,10 @@ def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_fil
 def getContentFromId(outputDir, submissionId) -> VideoScript:
     reddit = __getReddit()
     # print("getting existing posts ids:")
-    existingPostIds = __getExistingPostIds(outputDir)
+    # existingPostIds = __getExistingPostIds(outputDir)
+    
+    # In getContentFromId()
+    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt")])
     # print(existingPostIds)
 
     # print("printing submissions IDs")
@@ -92,12 +99,23 @@ def __getContentFromPost(submission) -> VideoScript:
     return content
 
 
-# function retrieves a list of existing post IDs from the outputDir (output directory) where the videos are stored
-def __getExistingPostIds(outputDir):
-    files = os.listdir(outputDir)
+# function retrieves a list of existing post IDs from the outputDir's  where the videos are stored - accepts a list of dirs
+# def __getExistingPostIds(outputDir):
+#     files = os.listdir(outputDir)
 
-    files = [f for f in files if os.path.isfile(os.path.join(outputDir, f))]
-    post_ids = [re.sub(r'.*?-', '', file) for file in files]
-    post_ids_without_ext = [os.path.splitext(post_id)[0] for post_id in post_ids] # returning the post IDs with the '.mp4' extension
+#     files = [f for f in files if os.path.isfile(os.path.join(outputDir, f))]
+#     post_ids = [re.sub(r'.*?-', '', file) for file in files]
+#     post_ids_without_ext = [os.path.splitext(post_id)[0] for post_id in post_ids] # returning the post IDs with the '.mp4' extension
+#     return post_ids_without_ext
+
+def __getExistingPostIds(directories):
+    post_ids_without_ext = []
+
+    for outputDir in directories:
+        files = os.listdir(outputDir)
+
+        files = [f for f in files if os.path.isfile(os.path.join(outputDir, f))]
+        post_ids = [re.sub(r'.*?-', '', file) for file in files]
+        post_ids_without_ext.extend([os.path.splitext(post_id)[0] for post_id in post_ids])  # returning the post IDs with the '.mp4' extension
+    
     return post_ids_without_ext
-
