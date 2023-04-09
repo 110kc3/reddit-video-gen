@@ -1,6 +1,6 @@
 from datetime import datetime
 from moviepy.editor import AudioFileClip
-import voiceover
+import Scripts.voiceover as voiceover
 
 MAX_WORDS_PER_COMMENT = 100
 MIN_COMMENTS_FOR_FINISH = 4

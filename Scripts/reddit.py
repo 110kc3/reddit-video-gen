@@ -1,5 +1,6 @@
-import os, re, praw, markdown_to_text, time
-from videoscript import VideoScript
+import os, re, praw, Scripts.markdown_to_text as markdown_to_text
+import time
+from Scripts.videoscript import VideoScript
 import random
 from praw.models import MoreComments
 
@@ -10,7 +11,7 @@ def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_fil
     reddit = __getReddit()
     # existingPostIds = __getExistingPostIds(outputDir)
     # In getContent()
-    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt")])
+    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt"), os.path.join(outputDir, "used_yt/used_tiktok")])
 
 
 
@@ -57,7 +58,7 @@ def getContentFromId(outputDir, submissionId) -> VideoScript:
     # existingPostIds = __getExistingPostIds(outputDir)
     
     # In getContentFromId()
-    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt")])
+    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt"), "used_yt/used_tiktok"])
     # print(existingPostIds)
 
     # print("printing submissions IDs")

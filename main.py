@@ -1,4 +1,4 @@
-from createVideo import createVideo
+from Scripts.createVideo import createVideo
 
 def main():
     num_videos = 1  # Change this value to the number of videos you want to create

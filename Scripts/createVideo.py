@@ -2,8 +2,10 @@ from moviepy.editor import *
 import shutil
 import os
 
-import reddit, screenshot, time, subprocess, random, configparser, sys, math
-from youtube_upload import upload_video
+import Scripts.reddit as reddit
+
+import  Scripts.screenshot as screenshot, time, subprocess, random, configparser, sys, math
+from Scripts.youtube_upload import upload_video
 
 def createVideo():
     config = configparser.ConfigParser()

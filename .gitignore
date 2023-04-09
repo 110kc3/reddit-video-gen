@@ -5,7 +5,7 @@ Screenshots/*
 Voiceovers/*
 Lib/*
 Scripts/tiktok
-
+Scripts_test
 metadata.json
 pyvenv.cfg
 client_secrets.json
@@ -14,3 +14,4 @@ authorized_user.json
 client_secrets_desktop.json
 tiktok/tiktok.ini
 Secrets/*
+*.pyc
