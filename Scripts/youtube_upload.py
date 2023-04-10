@@ -45,7 +45,8 @@ def upload_video(file_path, title, description, tags, category_id):
 
 
         print(f"Video uploaded to YouTube with video ID: {response['id']}")
+        return True
     except HttpError as e:
         print(f"An error occurred: {e}")
         print("Video was not uploaded to YouTube.")
-        pass
+        return False

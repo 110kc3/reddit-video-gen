@@ -69,6 +69,13 @@ IAM policy should look like this:
 
 TODO:
 
+Fix check for created videos in bucket,
+issues with the filenames creation 
+
+Fix videos from ID
+
+verify if the background video file is in correct format
+
 Change storage of the files:
 - move finished files to specific folder
 - have all video files on S3 bucket
