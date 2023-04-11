@@ -6,12 +6,13 @@ from Secrets.aws_secrets import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 import os
 
 
-def upload_file_to_s3(bucket, file_path, object_name):
+def upload_file_to_s3(s3, file_path, bucket, object_name):
     try:
         s3.upload_file(file_path, bucket, object_name)
         print(f"File {file_path} uploaded to S3 bucket {bucket} as {object_name}")
     except NoCredentialsError:
         print("AWS credentials not available")
+
 
 
 def download_file_from_s3(bucket, object_name, file_path):
@@ -41,15 +42,11 @@ def __get_existing_post_ids(bucket_name):
             return post_ids_without_ext
 
         for obj in s3_objects['Contents']:
-            print("obj " + str(obj))
             filename = obj['Key']
-            print("filename " + str(filename))
-            # post_id = os.path.splitext(filename)[0]  # Remove the '.txt' extension
-            # post_ids_without_ext.append(post_id)
 
             # Extract the post ID using regex
             post_id_match = re.search(r'-([a-zA-Z0-9]+)\.mp4\.txt$', filename)
-            print(str(post_id_match))
+            # print(str(post_id_match))
             if post_id_match:
                 post_id = post_id_match.group(1)
                 post_ids_without_ext.append(post_id)

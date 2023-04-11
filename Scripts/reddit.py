@@ -13,8 +13,7 @@ redditUrl = "https://www.reddit.com/"
 
 def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
     reddit = __getReddit()
-    # existingPostIds = __getExistingPostIds(outputDir)
-    # In getContent()
+
     # existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt"), os.path.join(outputDir, "used_yt/used_tiktok")])
 
     #getting created videos ID's from S3 bucket

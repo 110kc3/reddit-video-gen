@@ -69,23 +69,13 @@ IAM policy should look like this:
 
 TODO:
 
-Fix check for created videos in bucket,
-issues with the filenames creation 
-
-Fix videos from ID
 
 verify if the background video file is in correct format
-
-Change storage of the files:
-- move finished files to specific folder
-- have all video files on S3 bucket
 
 auto facebook upload
 
 
 check how to move to linux vm - headless setup
-
-
 
 Finish opacity of screenshots
 
@@ -97,6 +87,16 @@ auto tiktok upload - kinda difficult - would need separate page deployed for aut
 
 
 DONE:
+
+Fix check for created videos in bucket,
+issues with the filenames creation 
+
+
+Change storage of the files:
+- move finished files to specific folder
+- have all video files on S3 bucket
+
+Fix videos from ID
 
 Checking if the same video already exists
 

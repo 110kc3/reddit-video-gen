@@ -14,7 +14,7 @@ import Scripts.reddit as reddit
 
 import  Scripts.screenshot as screenshot, time, subprocess, random, configparser, sys, math
 from Scripts.youtube_upload import upload_video
-from Scripts.aws_bucket_handler import upload_video_id_to_s3
+from Scripts.aws_bucket_handler import upload_file_to_s3, upload_video_id_to_s3
 
 
 
@@ -31,8 +31,9 @@ def createVideo():
     from_used_bg_bucket = False
 
      # Get the background videos bucket
-    output_bucket = config['S3']['OutputVideosBucket']
+    output_bucket = config['S3']['OutputVideosBucket'] #not uploaded to YT
     uploaded_youtube_output_bucket = config["S3"]["YoutubeOutputVideosBucket"]
+    uploaded_youtube_IDs_output_bucket = config["S3"]["IDsOfCreatedVideosBucket"]
 
 
 
@@ -209,15 +210,13 @@ def createVideo():
     # Choose the appropriate S3 bucket based on the upload success
     if upload_successful:
         output_bucket = uploaded_youtube_output_bucket
-    else:
-        output_bucket = output_bucket
 
     # Upload the video to the appropriate S3 bucket
-    s3.upload_file(Filename=outputFile, Bucket=output_bucket, Key=os.path.basename(outputFile))
+    upload_file_to_s3(s3, Filename=outputFile, Bucket=output_bucket, Key=os.path.basename(outputFile))
   
     # Add this line after the video is created and uploaded
     print("starting to upload created video ID")
-    upload_video_id_to_s3(outputFile, "done-videos-txt-bucket-internetstoriesguru", video_description, video_tags)
+    upload_video_id_to_s3(outputFile, uploaded_youtube_IDs_output_bucket, video_description, video_tags)
 
 
     print("Starting cleanup")
