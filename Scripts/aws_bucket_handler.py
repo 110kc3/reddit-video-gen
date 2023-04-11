@@ -1,3 +1,4 @@
+import re
 import boto3
 from botocore.exceptions import NoCredentialsError
 from io import BytesIO
@@ -35,13 +36,23 @@ def __get_existing_post_ids(bucket_name):
 
     try:
         s3_objects = s3.list_objects_v2(Bucket=bucket_name)
+
         if 'Contents' not in s3_objects:
             return post_ids_without_ext
 
         for obj in s3_objects['Contents']:
+            print("obj " + str(obj))
             filename = obj['Key']
-            post_id = os.path.splitext(filename)[0]  # Remove the '.txt' extension
-            post_ids_without_ext.append(post_id)
+            print("filename " + str(filename))
+            # post_id = os.path.splitext(filename)[0]  # Remove the '.txt' extension
+            # post_ids_without_ext.append(post_id)
+
+            # Extract the post ID using regex
+            post_id_match = re.search(r'-([a-zA-Z0-9]+)\.mp4\.txt$', filename)
+            print(str(post_id_match))
+            if post_id_match:
+                post_id = post_id_match.group(1)
+                post_ids_without_ext.append(post_id)
 
     except Exception as e:
         print(f"Error fetching existing post IDs from S3: {e}")

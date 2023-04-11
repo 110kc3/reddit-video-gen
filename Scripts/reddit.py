@@ -21,12 +21,7 @@ def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_fil
     config = configparser.ConfigParser()
     config.read('config.ini')
     ids_of_created_videos_bucket = config['S3']['IDsOfCreatedVideosBucket']
-
-
-
     existingPostIds = __get_existing_post_ids(ids_of_created_videos_bucket)
-
-
     print("hello "+str(existingPostIds))
 
     now = int(time.time())

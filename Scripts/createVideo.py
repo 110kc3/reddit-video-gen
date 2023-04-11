@@ -56,8 +56,7 @@ def createVideo():
         # script = reddit.getContent(outputDir, postOptionCount, auto_select)
     fileName = script.getFileName()
 
-    # Create screenshots
-    
+    # Create screenshots, there is an issue with google popup, not sure how to fix it - trying couple times works eventually
     try:
         screenshot.getPostScreenshots(fileName, script)
     except:
@@ -143,9 +142,9 @@ def createVideo():
     safe_title = "".join([c if c.isalnum() or c.isspace() else "_" for c in script.title]) 
 
     timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")  # Replace colons with nothing in the time format
-    outputFile = f"{outputDir}/{safe_title}-{timestamp}.mp4"  # Use the title and timestamp as the filename
+    # outputFile = f"{outputDir}/{safe_title}-{timestamp}.mp4"  # Use the title and timestamp as the filename
 
-    # outputFile = f"{outputDir}/{safe_title}-{fileName}.mp4"  # Use the title as the filename
+    outputFile = f"{outputDir}/{safe_title}-{fileName}.mp4"  # Use the title as the filename
 
     final.write_videofile(
         outputFile, 
@@ -229,9 +228,11 @@ def createVideo():
         # Define the paths for the Screenshots and Voiceovers folders
         screenshots_folder = os.path.join(current_dir, "Screenshots")
         voiceovers_folder = os.path.join(current_dir, "Voiceovers")
+        outputvideos_folder = os.path.join(current_dir, "OutputVideos")
 
         # Clear the folders
         clear_folder(screenshots_folder)
+        clear_folder(outputvideos_folder)
         clear_folder(voiceovers_folder)
 
     except:
