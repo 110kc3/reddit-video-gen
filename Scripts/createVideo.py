@@ -1,3 +1,4 @@
+from datetime import datetime
 from moviepy.editor import *
 import shutil
 import os
@@ -13,6 +14,7 @@ import Scripts.reddit as reddit
 
 import  Scripts.screenshot as screenshot, time, subprocess, random, configparser, sys, math
 from Scripts.youtube_upload import upload_video
+from Scripts.aws_bucket_handler import upload_video_id_to_s3
 
 
 
@@ -55,7 +57,14 @@ def createVideo():
     fileName = script.getFileName()
 
     # Create screenshots
-    screenshot.getPostScreenshots(fileName, script)
+    
+    try:
+        screenshot.getPostScreenshots(fileName, script)
+    except:
+        try:
+            screenshot.getPostScreenshots(fileName, script)
+        except:
+            exit()
 
 
     print("starting background bucket reading")
@@ -67,6 +76,7 @@ def createVideo():
     if 'Contents' not in response:
         # List objects in the used background videos bucket
         response = s3.list_objects_v2(Bucket=used_bg_bucket)
+        print("NO MORE BACKGROUND IMAGES") #TODO create an alert
         from_used_bg_bucket = True
 
     # Store object keys in a list
@@ -93,29 +103,6 @@ def createVideo():
     num_loops = math.ceil(voiceover_duration / bg_duration)
     backgroundVideo = raw_background_video.fx(vfx.loop, duration=voiceover_duration)
     w, h = backgroundVideo.size
-
-
-    # # Setup background clip
-    # bgDir = config["General"]["BackgroundDirectory"]
-    # bgPrefix = config["General"]["BackgroundFilePrefix"]
-    # bgCount = int(config["General"]["BackgroundVideos"])
-    # # Randomize bgIndex until the video file exists
-    # bgIndex=None
-    # backgroundVideo = None
-    # while not os.path.exists(f"{bgDir}/{bgPrefix}{bgIndex}.mp4"):
-    #     bgIndex = random.randint(0, bgCount-1)
-
-    # # bgIndex = random.randint(0, bgCount-1)
-
-    # # Setup background clip and loop the video if it's too short
-    # voiceover_duration = script.getDuration()
-    # raw_background_video = VideoFileClip(
-    #     filename=f"{bgDir}/{bgPrefix}{bgIndex}.mp4",
-    #     audio=False)
-    # bg_duration = raw_background_video.duration
-    # num_loops = math.ceil(voiceover_duration / bg_duration)
-    # backgroundVideo = raw_background_video.fx(vfx.loop, duration=voiceover_duration)
-    # w, h = backgroundVideo.size
 
     def __createClip(screenShotFile, audioClip, marginSize):
         print(f"Creating clip for: {screenShotFile}")  # Add this line to print the file path
@@ -217,7 +204,7 @@ def createVideo():
     print("Starting video upload to YT")
  
     # Upload the video to YouTube
-    # upload_successful = upload_video(outputFile, video_title, video_description, video_tags)
+    # upload_successful = upload_video(outputFile, video_title, video_description, video_tags, video_category_id)
     upload_successful = True
 
     # Choose the appropriate S3 bucket based on the upload success
@@ -229,26 +216,39 @@ def createVideo():
     # Upload the video to the appropriate S3 bucket
     s3.upload_file(Filename=outputFile, Bucket=output_bucket, Key=os.path.basename(outputFile))
   
-    
+    # Add this line after the video is created and uploaded
+    print("starting to upload created video ID")
+    upload_video_id_to_s3(outputFile, "done-videos-txt-bucket-internetstoriesguru", video_description, video_tags)
+
 
     print("Starting cleanup")
-
     # Get the current script directory
     current_dir = os.path.dirname(os.path.realpath(__file__))
 
-    # Define the paths for the Screenshots and Voiceovers folders
-    screenshots_folder = os.path.join(current_dir, "Screenshots")
-    voiceovers_folder = os.path.join(current_dir, "Voiceovers")
+    try:
+        # Define the paths for the Screenshots and Voiceovers folders
+        screenshots_folder = os.path.join(current_dir, "Screenshots")
+        voiceovers_folder = os.path.join(current_dir, "Voiceovers")
 
-    # Clear the folders
-    clear_folder(screenshots_folder)
-    clear_folder(voiceovers_folder)
+        # Clear the folders
+        clear_folder(screenshots_folder)
+        clear_folder(voiceovers_folder)
 
-    backgroundVideo.close()
-    # Close the raw_background_video clip
-    raw_background_video.close()
-    # remove the temporary file after you are done
-    os.remove(tmp_bg_video_file)
+    except:
+        print("failed to remove screenshot and voiceover contents")
+    
+    try:
+        print("trying to delete background file")
+        backgroundVideo.close()
+        # Close the raw_background_video clip
+        raw_background_video.close()
+        # remove the temporary file after you are done
+        os.remove(tmp_bg_video_file)
+
+    except:
+        print("failed to remove screenshot and voiceover contents")
+    
+    #todo delete outpud video local 
 
     # Remove the background video file from the bucket if it's not from the used_bg_bucket
     if not from_used_bg_bucket:
@@ -286,6 +286,9 @@ import os
 import shutil
 
 def clear_folder(folder_path):
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+    
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
         try:

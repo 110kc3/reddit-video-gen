@@ -3,17 +3,31 @@ import time
 from Scripts.videoscript import VideoScript
 import random
 from praw.models import MoreComments
+from  Scripts.aws_bucket_handler import __get_existing_post_ids 
+
+import configparser
+from Secrets.reddit_secrets import reddit_client_id, reddit_client_secret, reddit_user_agent
+
 
 redditUrl = "https://www.reddit.com/"
-
 
 def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
     reddit = __getReddit()
     # existingPostIds = __getExistingPostIds(outputDir)
     # In getContent()
-    existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt"), os.path.join(outputDir, "used_yt/used_tiktok")])
+    # existingPostIds = __getExistingPostIds([outputDir, os.path.join(outputDir, "used_yt"), os.path.join(outputDir, "used_yt/used_tiktok")])
+
+    #getting created videos ID's from S3 bucket
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    ids_of_created_videos_bucket = config['S3']['IDsOfCreatedVideosBucket']
 
 
+
+    existingPostIds = __get_existing_post_ids(ids_of_created_videos_bucket)
+
+
+    print("hello "+str(existingPostIds))
 
     now = int(time.time())
     autoSelect = auto_select or postOptionCount == 0
@@ -73,16 +87,22 @@ def getContentFromId(outputDir, submissionId) -> VideoScript:
         exit()
     return __getContentFromPost(submission)
 
-def __getReddit():
-    return praw.Reddit(
-        client_id="3392eYFbN73bpfEDZ-1ATA",
-        client_secret="XVXfwp52AksHp1PfvvWeUpQ-MeaCxQ",
-        # user_agent sounds scary, but it's just a string to identify what your using it for
-        # It's common courtesy to use something like <platform>:<name>:<version> by <your name>
-        # ex. "Window11:TestApp:v0.1 by u/Shifty-The-Dev"
-        user_agent="Window10:CommentFetcher:v0.1 by u/Speedi1103"
-    )
 
+def __getReddit():
+    #     return praw.Reddit(
+    #     client_id="3392eYFbN73bpfEDZ-1ATA",
+    #     client_secret="XVXfwp52AksHp1PfvvWeUpQ-MeaCxQ",
+    #     # user_agent sounds scary, but it's just a string to identify what your using it for
+    #     # It's common courtesy to use something like <platform>:<name>:<version> by <your name>
+    #     # ex. "Window11:TestApp:v0.1 by u/Shifty-The-Dev"
+    #     user_agent="Window10:CommentFetcher:v0.1 by u/Speedi1103"
+    # )
+    print(str(reddit_client_id))
+    return praw.Reddit(
+    client_id=str(reddit_client_id),
+    client_secret=str(reddit_client_secret),
+    user_agent=str(reddit_user_agent)
+    )
 
 def __getContentFromPost(submission) -> VideoScript:
     content = VideoScript(submission.url, submission.title, submission.id)
@@ -109,6 +129,9 @@ def __getContentFromPost(submission) -> VideoScript:
 #     post_ids_without_ext = [os.path.splitext(post_id)[0] for post_id in post_ids] # returning the post IDs with the '.mp4' extension
 #     return post_ids_without_ext
 
+
+
+#checking the directories for created videos and looking for the post IDs
 def __getExistingPostIds(directories):
     post_ids_without_ext = []
 
