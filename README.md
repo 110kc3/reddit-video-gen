@@ -63,7 +63,11 @@ IAM policy should look like this:
 
 
 
-
+Broken
+FIX:
+verify if the background video file is in correct format
+when video is not vertical - also handle proper screenshot scaling
+ code only will work when video is in vertical format - no idea how to fix it
 
 
 
@@ -72,19 +76,14 @@ TODO:
 FIX:
 Selenium - how to block popups (screenshot taking is not working every time)
 
-FIX:
-when video is not vertical - also handle proper screenshot scaling
-
+test if the background video is long
 ...
 
 Proper error handling
 
 there is an issue if the 2nd bucket fo background video is selected TODO
 
-verify if the background video file is in correct format
-
 auto facebook upload
-
 
 check how to move to linux vm - headless setup
 

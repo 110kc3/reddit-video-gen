@@ -5,7 +5,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
 import time
 from selenium.common.exceptions import NoSuchElementException
-
+from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+from selenium.webdriver import Firefox, FirefoxOptions
+from selenium.webdriver.support.ui import WebDriverWait
 # Config
 screenshotDir = "Screenshots"
 screenWidth = 400
@@ -66,7 +68,7 @@ def enable_dark_mode(driver, wait):
 def getPostScreenshots(filePrefix, script):
     print("Taking screenshots...")
     driver, wait = __setupDriver(script.url)
-
+    
     # Close the Google login popup if present - not required in most of the cases, hovewer if present it may be impossible to close it anyway
     # close_google_login_popup(driver, wait)
 
@@ -112,18 +114,34 @@ def __takeScreenshot(filePrefix, driver, wait, handle="Post"):
     return fileName
 
 def __setupDriver(url: str):
-    options = webdriver.FirefoxOptions()
+    # options = webdriver.FirefoxOptions()
+    options = FirefoxOptions()
     options.headless = False
     options.enable_mobile = False
     # Configure Firefox preferences to block popups
-    firefox_profile = webdriver.FirefoxProfile()
+    # firefox_profile = webdriver.FirefoxProfile()
+    # firefox_profile.set_preference("dom.disable_open_during_load", True)
+    # options.profile = firefox_profile
+
+    # driver = webdriver.Firefox(options=options)
+    # wait = WebDriverWait(driver, 10)
+
+    # driver.set_window_size(width=screenWidth, height=screenHeight)
+    # driver.get(url)
+
+    # Configure Firefox preferences to block popups
+    firefox_profile = FirefoxProfile()
     firefox_profile.set_preference("dom.disable_open_during_load", True)
+
+    # Disable web push notifications
+    firefox_profile.set_preference("dom.webnotifications.enabled", False)
+
     options.profile = firefox_profile
 
-    driver = webdriver.Firefox(options=options)
+    driver = Firefox(options=options)
     wait = WebDriverWait(driver, 10)
 
     driver.set_window_size(width=screenWidth, height=screenHeight)
     driver.get(url)
-
     return driver, wait
+

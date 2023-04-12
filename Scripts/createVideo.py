@@ -18,7 +18,8 @@ from Scripts.youtube_upload import upload_video
 from Scripts.aws_bucket_handler import download_file_from_s3, upload_file_to_s3, upload_video_id_to_s3
 
 from moviepy.video.fx.crop import crop
-
+from moviepy.video.fx import resize
+from PIL import Image
 def createVideo():
     
     try:
@@ -106,42 +107,21 @@ def createVideo():
         #     print(f"An error occurred while creating video  {e}")
         #     exit()
 
-        #TEMP COMMENTED
-        # # Setup background clip and loop the video if it's too short
-        # voiceover_duration = script.getDuration()
-        # raw_background_video = VideoFileClip(filename=tmp_bg_video_file, audio=False)
-        # bg_duration = raw_background_video.duration
-        # num_loops = math.ceil(voiceover_duration / bg_duration)
-
-        # backgroundVideo = raw_background_video.fx(vfx.loop, duration=voiceover_duration)
-        # w, h = backgroundVideo.size
-
-
-        # # Check if the video is in vertical format
-        # aspect_ratio = w / h
-        # if aspect_ratio < 1:
-        #     print("The background video is in vertical format.")
-        # else:
-        #     print("The background video is NOT in vertical format. Converting to vertical format.")
-        #     # Calculate the new width while maintaining the aspect ratio
-        #     new_width = int(h * aspect_ratio)
-
-        #     # Crop the video to fit the vertical format while keeping its center
-        #     backgroundVideo = crop(backgroundVideo, width=new_width, height=h, x_center=backgroundVideo.w/2, y_center=backgroundVideo.h/2)
-
-        #     # Resize the cropped video to the desired dimensions
-        #     backgroundVideo = resize(backgroundVideo, newsize=(w, h))
-
-
         # Setup background clip and loop the video if it's too short
         voiceover_duration = script.getDuration()
         raw_background_video = VideoFileClip(filename=tmp_bg_video_file, audio=False)
         bg_duration = raw_background_video.duration
+        #not tested
+        if bg_duration > voiceover_duration:
+            print("The background video is longer than the voiceover. Cutting to fit the duration.")
+            raw_background_video = raw_background_video.subclip(0, voiceover_duration+1)
+            bg_duration = raw_background_video.duration
+
         num_loops = math.ceil(voiceover_duration / bg_duration)
 
         # Get the size of the raw background video
         w, h = raw_background_video.size
-        print ("raw_background_video.size is " + str(raw_background_video.size))
+        print("raw_background_video.size is " + str(raw_background_video.size))
 
         # Check if the video is in vertical format
         aspect_ratio = w / h
@@ -150,57 +130,42 @@ def createVideo():
             print("The background video is in vertical format.")
         else:
             print("The background video is NOT in vertical format. Converting to vertical format.")
-                      
-            try:
-                # Calculate the new width while maintaining the aspect ratio
-                new_width = int(h / aspect_ratio)
 
-                # Crop the video to fit the vertical format while keeping its center
-                raw_background_video = crop(raw_background_video, width=new_width, height=h, x_center=raw_background_video.w/2, y_center=raw_background_video.h/2)
+            # Calculate the new width while maintaining the aspect ratio
+            new_width = int(h * (9 / 16))
 
-                # Resize the cropped video to the desired dimensions
-                raw_background_video = resize(raw_background_video, newsize=(w, h))
-            except Exception as e:
-                print(f"Failed resize background video. Reason: {e}")
-                
+            # Crop the video to fit the vertical format while keeping its center
+            raw_background_video = crop(raw_background_video, width=new_width, height=h, x_center=raw_background_video.w / 2, y_center=raw_background_video.h / 2)
 
-        # Loop the video after cropping and resizing
+        # Loop the video after cropping (if necessary)
         backgroundVideo = raw_background_video.fx(vfx.loop, duration=voiceover_duration)
 
         def __createClip(screenShotFile, audioClip, marginSize):
             print(f"Creating clip for: {screenShotFile}")
 
+            # Calculate the new size for the screenshot while maintaining its aspect ratio
+            screenshot_image = Image.open(screenShotFile)
+            image_w, image_h = screenshot_image.size
+            scale_w = (w - 2 * marginSize) / image_w
+            scale_h = (h - 2 * marginSize) / image_h
+
+            scale_factor = min(scale_w, scale_h)
+
+            new_w = int(image_w * scale_factor)
+            new_h = int(image_h * scale_factor)
+
+            # Create the image clip
             imageClip = ImageClip(
                 screenShotFile,
                 duration=audioClip.duration
             ).set_position(("center", "center"))
 
-            # Calculate the new width and height of the screenshot while maintaining the aspect ratio
-            img_w, img_h = imageClip.size
-            img_aspect_ratio = img_w / img_h
-            new_img_width = int(h * img_aspect_ratio)
-
-            # Resize the screenshot with the new width and keep the same height
-            imageClip = imageClip.resize(width=(new_img_width))
-
-            # Center the resized screenshot on the background
-            imageClip = imageClip.set_position(("center", "center"))
+            # Resize the image
+            imageClip = imageClip.resize(width=new_w, height=new_h)
 
             videoClip = imageClip.set_audio(audioClip)
             videoClip.fps = 1
             return videoClip
-
-        # def __createClip(screenShotFile, audioClip, marginSize):
-        #     print(f"Creating clip for: {screenShotFile}")  # Add this line to print the file path
-
-        #     imageClip = ImageClip(
-        #         screenShotFile,
-        #         duration=audioClip.duration
-        #         ).set_position(("center", "center"))
-        #     imageClip = imageClip.resize(width=(w-marginSize))
-        #     videoClip = imageClip.set_audio(audioClip)
-        #     videoClip.fps = 1
-        #     return videoClip
 
         # Create video clips
         print("Editing clips together...")
@@ -238,7 +203,7 @@ def createVideo():
         )
         print(f"Video completed in {time.time() - startTime}")
 
-
+   
         # Preview in VLC for approval before uploading
         if (config["General"].getboolean("PreviewBeforeUpload")):
             vlcPath = config["General"]["VLCPath"]
@@ -250,7 +215,7 @@ def createVideo():
         print(f"Title: {script.title}  File: {outputFile}")
         endTime = time.time()
         print(f"Total time: {endTime - startTime}")
-        return 0
+
         # Upload the video to YouTube
         video_title = script.title
 
@@ -337,8 +302,9 @@ def createVideo():
         # Remove the background video file from the bucket if it's not from the used_bg_bucket
         if not from_used_bg_bucket:
             s3.delete_object(Bucket=bg_bucket, Key=selected_bg_video_key)
-    except:
-        print(" EXCEPT  issue with create video function - calling cleanup")
+    except Exception as e:
+   
+        print(f" EXCEPT  issue with create video function - calling cleanup Reason: {e}")
         current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         try:
             # Define the paths for the Screenshots and Voiceovers folders
