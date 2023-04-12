@@ -62,21 +62,18 @@ def createVideo():
         except:
             exit()
 
-
     print("starting background bucket reading")
     response = ""
     # List objects in the background videos bucket
     response = s3.list_objects_v2(Bucket=bg_bucket)
-    print(response)
 
     # Check if there are no videos in the bucket
     if 'Contents' not in response:
         # List objects in the used background videos bucket
         response = s3.list_objects_v2(Bucket=used_bg_bucket)
-        print(response)
+        # print(response)
         print("NO MORE BACKGROUND IMAGES") #TODO create an alert
         from_used_bg_bucket = True
-    print(response)
 
     # Store object keys in a list
     bg_videos = [content['Key'] for content in response['Contents']]
