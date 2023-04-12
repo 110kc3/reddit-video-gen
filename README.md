@@ -69,6 +69,7 @@ IAM policy should look like this:
 
 TODO:
 
+there is an issue if the 2nd bucket fo background video is selected TODO
 
 verify if the background video file is in correct format
 

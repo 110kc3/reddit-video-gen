@@ -9,15 +9,13 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 from Secrets.aws_secrets import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
 import Scripts.aws_bucket_handler
+import tempfile
 
 import Scripts.reddit as reddit
 
 import  Scripts.screenshot as screenshot, time, subprocess, random, configparser, sys, math
 from Scripts.youtube_upload import upload_video
-from Scripts.aws_bucket_handler import upload_file_to_s3, upload_video_id_to_s3
-
-
-
+from Scripts.aws_bucket_handler import download_file_from_s3, upload_file_to_s3, upload_video_id_to_s3
 
 def createVideo():
     config = configparser.ConfigParser()
@@ -34,8 +32,6 @@ def createVideo():
     output_bucket = config['S3']['OutputVideosBucket'] #not uploaded to YT
     uploaded_youtube_output_bucket = config["S3"]["YoutubeOutputVideosBucket"]
     uploaded_youtube_IDs_output_bucket = config["S3"]["IDsOfCreatedVideosBucket"]
-
-
 
     startTime = time.time()
 
@@ -68,16 +64,19 @@ def createVideo():
 
 
     print("starting background bucket reading")
-
+    response = ""
     # List objects in the background videos bucket
     response = s3.list_objects_v2(Bucket=bg_bucket)
+    print(response)
 
     # Check if there are no videos in the bucket
     if 'Contents' not in response:
         # List objects in the used background videos bucket
         response = s3.list_objects_v2(Bucket=used_bg_bucket)
+        print(response)
         print("NO MORE BACKGROUND IMAGES") #TODO create an alert
         from_used_bg_bucket = True
+    print(response)
 
     # Store object keys in a list
     bg_videos = [content['Key'] for content in response['Contents']]
@@ -94,7 +93,17 @@ def createVideo():
     # tmp_bg_video_file = f"/tmp/{os.path.basename(selected_bg_video_key)}".replace("\\", "/") #windows
 
     print("starting background bucket download")
+    # download_file_from_s3()
+
     s3.download_file(bg_bucket, selected_bg_video_key, tmp_bg_video_file)
+    # there is an issue if the 2nd bucket is selected TODO
+    # try:
+    #     with tempfile.NamedTemporaryFile(delete=False) as tmp_bg_video_file:
+    #         download_file_from_s3(s3, bg_bucket, selected_bg_video_key, tmp_bg_video_file.name)
+    #         raw_background_video = moviepy.editor.VideoFileClip(tmp_bg_video_file.name, audio=False)
+    # except Exception as e:
+    #     print(f"An error occurred while creating video  {e}")
+    #     exit()
 
     # Setup background clip and loop the video if it's too short
     voiceover_duration = script.getDuration()
@@ -141,9 +150,6 @@ def createVideo():
     bitrate = config["Video"]["Bitrate"]
     threads = config["Video"]["Threads"]
     safe_title = "".join([c if c.isalnum() or c.isspace() else "_" for c in script.title]) 
-
-    timestamp = datetime.now().strftime("%Y-%m-%d-%H%M")  # Replace colons with nothing in the time format
-    # outputFile = f"{outputDir}/{safe_title}-{timestamp}.mp4"  # Use the title and timestamp as the filename
 
     outputFile = f"{outputDir}/{safe_title}-{fileName}.mp4"  # Use the title as the filename
 
@@ -204,24 +210,25 @@ def createVideo():
     print("Starting video upload to YT")
  
     # Upload the video to YouTube
-    # upload_successful = upload_video(outputFile, video_title, video_description, video_tags, video_category_id)
-    upload_successful = True
+    upload_successful = upload_video(outputFile, video_title, video_description, video_tags, video_category_id)
+    # upload_successful = True
 
     # Choose the appropriate S3 bucket based on the upload success
     if upload_successful:
         output_bucket = uploaded_youtube_output_bucket
 
     # Upload the video to the appropriate S3 bucket
-    upload_file_to_s3(s3, Filename=outputFile, Bucket=output_bucket, Key=os.path.basename(outputFile))
+    upload_file_to_s3(s3, outputFile, output_bucket, os.path.basename(outputFile))
   
     # Add this line after the video is created and uploaded
     print("starting to upload created video ID")
-    upload_video_id_to_s3(outputFile, uploaded_youtube_IDs_output_bucket, video_description, video_tags)
+    upload_video_id_to_s3(s3, outputFile, uploaded_youtube_IDs_output_bucket, video_description, video_tags)
 
 
     print("Starting cleanup")
-    # Get the current script directory
-    current_dir = os.path.dirname(os.path.realpath(__file__))
+    # current_dir variable to the parent directory,
+    current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
 
     try:
         # Define the paths for the Screenshots and Voiceovers folders
@@ -256,41 +263,18 @@ def createVideo():
 
 
 
-    #TODO - fix for S3 bucket handling
-    # # after the video is uploaded
-    # used_yt_dir = f"{outputDir}/used_yt"  
-    # used_backgroundvideo_dir = f"{bgDir}/used"
-    
-    # # Call the cleanup_files function after uploading the video
-    # cleanup_files(script)
-
-    # # Move the output video to the "used_yt" folder
-    # try:
-    #     # shutil.move(outputFile, f"{used_yt_dir}/{safe_title}-{fileName}.mp4")
-    #     unique_output_file = generate_unique_filename(used_yt_dir, f"{safe_title}-{fileName}.mp4")
-    #     shutil.move(outputFile, os.path.join(used_yt_dir, unique_output_file))
-
-    # except Exception as e:
-    #     print(f"An error occurred while moving the output video: {e}")
-
-    # # Move the background video to the "used" folder
-    # try:
-    #     # Move the background video to the "used" folder
-    #     unique_background_file = generate_unique_filename(used_backgroundvideo_dir, f"{bgPrefix}{bgIndex}.mp4")
-    #     shutil.move(f"{bgDir}/{bgPrefix}{bgIndex}.mp4", os.path.join(used_backgroundvideo_dir, unique_background_file))
-    # except Exception as e:
-    #     print(f"An error occurred while moving the background video: {e}")
-
 
 import os
 import shutil
 
 def clear_folder(folder_path):
+    print(f"Clearing folder: {folder_path}")  # Add this line
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
     
     for filename in os.listdir(folder_path):
         file_path = os.path.join(folder_path, filename)
+        print(f"Deleting file: {file_path}")  # Add this line
         try:
             if os.path.isfile(file_path):
                 os.unlink(file_path)
@@ -298,6 +282,7 @@ def clear_folder(folder_path):
                 shutil.rmtree(file_path)
         except Exception as e:
             print(f"Failed to delete {file_path}. Reason: {e}")
+
 
 
 def generate_unique_filename(destination, filename):

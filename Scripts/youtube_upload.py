@@ -22,7 +22,6 @@ def upload_video(file_path, title, description, tags, category_id):
         if len(description) > 4500:
             description = description[:4450] + "..."
 
-
         body = {
             'snippet': {
                 'title': title,
@@ -42,7 +41,6 @@ def upload_video(file_path, title, description, tags, category_id):
                 media_body=MediaFileUpload(file_path, chunksize=-1, resumable=True)
             )
             response = request.execute()
-
 
         print(f"Video uploaded to YouTube with video ID: {response['id']}")
         return True

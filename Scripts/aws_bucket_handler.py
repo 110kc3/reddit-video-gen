@@ -15,7 +15,7 @@ def upload_file_to_s3(s3, file_path, bucket, object_name):
 
 
 
-def download_file_from_s3(bucket, object_name, file_path):
+def download_file_from_s3(s3, bucket, object_name, file_path):
     try:
         s3.download_file(bucket, object_name, file_path)
         print(f"File {object_name} downloaded from S3 bucket {bucket} to {file_path}")
@@ -55,9 +55,14 @@ def __get_existing_post_ids(bucket_name):
         print(f"Error fetching existing post IDs from S3: {e}")
 
     return post_ids_without_ext
-def upload_video_id_to_s3(video_id, bucket_name, video_description, video_tags):
-    s3 = boto3.client('s3')
-    file_content = f"Video ID: {video_id}\n\nVideo Description:\n{video_description}\n\nVideo Tags:\n{', '.join(video_tags)}"
-    file_key = f"{video_id}.txt"
+def upload_video_id_to_s3(s3, video_id, bucket_name, video_description, video_tags):
 
-    s3.put_object(Body=file_content, Bucket=bucket_name, Key=file_key)
+    try:
+        file_content = f"Video ID: {video_id}\n\nVideo Description:\n{video_description}\n\nVideo Tags:\n{', '.join(video_tags)}"
+        file_key = f"{video_id}.txt"
+
+        s3.put_object(Body=file_content, Bucket=bucket_name, Key=file_key)
+    except NoCredentialsError:
+        print("AWS credentials not available")
+    except Exception as e:
+            print("Exception "+str(e))

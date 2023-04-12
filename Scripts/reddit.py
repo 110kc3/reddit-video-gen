@@ -8,7 +8,6 @@ from  Scripts.aws_bucket_handler import __get_existing_post_ids
 import configparser
 from Secrets.reddit_secrets import reddit_client_id, reddit_client_secret, reddit_user_agent
 
-
 redditUrl = "https://www.reddit.com/"
 
 def getContent(outputDir, postOptionCount, auto_select, subreddit_name, time_filter) -> VideoScript:
@@ -83,15 +82,6 @@ def getContentFromId(outputDir, submissionId) -> VideoScript:
 
 
 def __getReddit():
-    #     return praw.Reddit(
-    #     client_id="3392eYFbN73bpfEDZ-1ATA",
-    #     client_secret="XVXfwp52AksHp1PfvvWeUpQ-MeaCxQ",
-    #     # user_agent sounds scary, but it's just a string to identify what your using it for
-    #     # It's common courtesy to use something like <platform>:<name>:<version> by <your name>
-    #     # ex. "Window11:TestApp:v0.1 by u/Shifty-The-Dev"
-    #     user_agent="Window10:CommentFetcher:v0.1 by u/Speedi1103"
-    # )
-    print(str(reddit_client_id))
     return praw.Reddit(
     client_id=str(reddit_client_id),
     client_secret=str(reddit_client_secret),
