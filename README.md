@@ -69,6 +69,16 @@ IAM policy should look like this:
 
 TODO:
 
+FIX:
+Selenium - how to block popups (screenshot taking is not working every time)
+
+FIX:
+when video is not vertical - also handle proper screenshot scaling
+
+...
+
+Proper error handling
+
 there is an issue if the 2nd bucket fo background video is selected TODO
 
 verify if the background video file is in correct format

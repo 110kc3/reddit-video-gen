@@ -68,7 +68,7 @@ def getPostScreenshots(filePrefix, script):
     driver, wait = __setupDriver(script.url)
 
     # Close the Google login popup if present - not required in most of the cases, hovewer if present it may be impossible to close it anyway
-    close_google_login_popup(driver, wait)
+    # close_google_login_popup(driver, wait)
 
     # Accept cookies before taking screenshots
     accept_cookies(driver, wait)
@@ -115,6 +115,11 @@ def __setupDriver(url: str):
     options = webdriver.FirefoxOptions()
     options.headless = False
     options.enable_mobile = False
+    # Configure Firefox preferences to block popups
+    firefox_profile = webdriver.FirefoxProfile()
+    firefox_profile.set_preference("dom.disable_open_during_load", True)
+    options.profile = firefox_profile
+
     driver = webdriver.Firefox(options=options)
     wait = WebDriverWait(driver, 10)
 
