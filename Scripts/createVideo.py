@@ -59,14 +59,24 @@ def createVideo():
         fileName = script.getFileName()
 
         # Create screenshots, there is an issue with google popup, not sure how to fix it - trying couple times works eventually
-        try:
-            screenshot.getPostScreenshots(fileName, script)
-        except:
+        max_attempts = 5
+        success = False
+
+        for attempt in range(max_attempts):
             try:
                 screenshot.getPostScreenshots(fileName, script)
-            except:
-                exit()
+                success = True
+                break
+            except Exception as e:
+                print(f"screenshot Attempt {attempt + 1} failed with error: {e}")
+                if attempt == max_attempts - 1:
+                    print("All screenshot attempts failed. Exiting.")
+                    exit()
+                else:
+                    print("Retrying screenshot...")
 
+        if success:
+            print("Screenshots created successfully.")
         print("starting background bucket reading")
         response = ""
         # List objects in the background videos bucket
@@ -308,13 +318,13 @@ def createVideo():
         current_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
         try:
             # Define the paths for the Screenshots and Voiceovers folders
-            # screenshots_folder = os.path.join(current_dir, "Screenshots")
+            screenshots_folder = os.path.join(current_dir, "Screenshots")
             voiceovers_folder = os.path.join(current_dir, "Voiceovers")
-            # outputvideos_folder = os.path.join(current_dir, "OutputVideos")
+            outputvideos_folder = os.path.join(current_dir, "OutputVideos")
 
             # Clear the folders
-            # clear_folder(screenshots_folder)
-            # clear_folder(outputvideos_folder)
+            clear_folder(screenshots_folder)
+            clear_folder(outputvideos_folder)
             clear_folder(voiceovers_folder)
 
         except:

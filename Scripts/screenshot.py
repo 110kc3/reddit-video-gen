@@ -116,7 +116,7 @@ def __takeScreenshot(filePrefix, driver, wait, handle="Post"):
 def __setupDriver(url: str):
     # options = webdriver.FirefoxOptions()
     options = FirefoxOptions()
-    options.headless = False
+    options.headless = True
     options.enable_mobile = False
     # Configure Firefox preferences to block popups
     # firefox_profile = webdriver.FirefoxProfile()
