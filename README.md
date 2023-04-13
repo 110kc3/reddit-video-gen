@@ -2,6 +2,12 @@
 
 Reddit Video Generator is a Python-based project that creates videos from top Reddit posts and their comments. The project uses Selenium WebDriver for taking screenshots of the posts, moviepy for video editing, and text-to-speech for generating audio from the post titles and comments.
 
+It is based on https://github.com/Shifty-The-Dev/RedditVideoGenerator project, hovewer with few improvments.
+
+Channel for the videos is https://youtube.com/@InternetStories69
+Also replicated some for tiktok https://www.tiktok.com/@internetstoriesguru
+
+
 ## Getting Started
 
 These instructions will help you set up the project on your local machine for development and usage purposes.*** not finished
@@ -9,18 +15,44 @@ These instructions will help you set up the project on your local machine for de
 ### Prerequisites
 
 ### For local usage
-1. Register with Reddit to create and API application [here](https://www.reddit.com/prefs/apps/)
+(currently local usage is not working, hovewer below are still needed for cloud application to work)
+1. Register with Reddit to create and Script API application [here](https://www.reddit.com/prefs/apps/) and fill your secrets in Secrets/reddit_secrets.py
 2. Youtube account
-3. GCP account with enabled [YouTube Data API](https://developers.google.com/youtube/v3)
+3. GCP account on the same email as Youtube account with enabled [YouTube Data API](https://developers.google.com/youtube/v3)
 You will need to create YouTube app on GCP and then authenticate to it... you will also need client_secrets_desktop.json in order to even connect to GCP from your account.
 4. AWS account* (this is needed for the voiceover voice I used, you could swap if for something else, but I found the Joanna voice to be the best for these type of videos)
 
 ### Additional for cloud usage and complete automation
-4. AWS account* - currently the code uses AWS buckets for all files handling, thus you will need to create couple of buckets on AWS. The script was tested on shitty 1gb Ubuntu VM, it can take up to an hour for a video to be generated.
-(you could use diferent provider, but aws is cheap af for this kind of project)
+4. AWS account: 
+- currently the code uses AWS buckets for all files handling, thus you will need to create couple of buckets on AWS. 
+The script was tested on 1CPU-1GB Ubuntu VM, it can take up to an hour for a video to be generated.
+(you could use diferent provider, but aws is free on that vm)
 
 
-### Set up your secrets
+### AWS: Set up the buckets
+
+1. Create buckets and update their name in config.ini
+
+BackgroundVideosBucket: Bucket that will keep background videos that will be used in background of the created videos (duh)
+Important to note that videos need to be already in vertical format. Used videos will be deleted from this bucket so this needs to be filled up after running the script few times.
+ADD your background videos into it.
+
+UsedBackgroundVideosBucket:
+This is additional bucket for background videos if the ones in previous bucket will be empty, this one is not cleared after background video is used.
+
+OutputVideosBucket:
+If the video will not be uploaded to youtube it will be sent to this bucket.
+
+YoutubeOutputVideosBucket: 
+If the video will be uploaded to youtube it will be sent to this bucket. (the idea was then to implement tiktok and facebook replication, without the need to create videos again - this was not implemented)
+
+IDsOfCreatedVideosBucket:
+If the video will be uploaded to youtube this bucket will receive .txt file with tittle, id, description and tags of the uploaded video. Script first checks this bucket for already created videos and exludes it from the pool of the videos that it's able to create.
+
+Another bucket, not in config.ini:
+- Upload your secrets to SECRETS-BUCKET (yes I know this is bad practise, seemed cheaper than to use secret manager)
+
+Bucket will need to contain 2 files, already in a folder:
 Secrets/aws_secrets.py
 AWS_ACCESS_KEY_ID = 
 AWS_SECRET_ACCESS_KEY = 
@@ -28,11 +60,30 @@ AWS_SECRET_ACCESS_KEY =
 Secrets/reddit_secrets.py
 reddit_client_id=""
 reddit_client_secret=""
-reddit_user_agent="Windows10:shitty-app:v0.1 by u/you"
+reddit_user_agent="Windows10:Shittyapp:v0.1 by u/you"
 
-### Autorize application to use youtube
+
+## AWS: Create IAM user with permissions to buckets and Amazon polly
+
+1. Sign in to the AWS Management Console and open the IAM console at https://console.aws.amazon.com/iam/.
+2. In the navigation pane, choose "Users".
+3. Find the user whose credentials you're using in your code and click on their name.
+4. Click the "Add permissions" button.
+
+Add below policies to this user: (one is for voiceovers, another for bucket access)
+
+AmazonPollyFullAccess 
+
+and create new policy and assign it to the user, 
+sample policy I used is in AWS/aws-iam-user-policy.json file
+
+Add his access key credentials to Secrets/aws_secrets.py
+
+### GCP: Autorize application to use youtube
 
 Next you have to authorize your youtube account
+
+https://developers.google.com/youtube/v3/guides/authentication
 
 On test setup you can use authorize_youtube.py
 
@@ -40,9 +91,20 @@ on headless setup use authorize_youtube_headless.py
 
 It completes the OAuth 2.0 authentication flow, with the use the flow.run_console() method to authenticate with the Google API using a code that you obtain from the Google Cloud Console.
 
-
+..........
 
 ### Installation
+
+AWS:
+1. Create IAM Role that will Allow EC2 instances to call AWS services on your behalf, give it the same permissions as the user above
+2. Create EC2 instance (Ubuntu 22)
+I used Canonical, Ubuntu, 22.04 LTS on eu-central-1 - ami-0ec7f9846da6b0f61
+
+
+- assign IAM user with required permissions to it
+- add startup script to the vm (AWS/aws-startup-script.sh)
+
+
 
 1. Clone the repository:
 
@@ -50,10 +112,6 @@ It completes the OAuth 2.0 authentication flow, with the use the flow.run_consol
 git clone https://github.com/yourusername/reddit-video-generator.git
 cd reddit-video-generator
 ```
-Create a virtual environment and activate it:
-
-python3 -m venv venv
-source venv/bin/activate
 Install the required dependencies:
 
 pip install -r requirements.txt

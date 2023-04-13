@@ -1,0 +1,35 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::background-videos-bucket-internetstoriesguru/*",
+                "arn:aws:s3:::used-bucket-background-videos-bucket-internetstoriesguru/*",
+                "arn:aws:s3:::output-videos-bucket-internetstoriesguru/*",
+                "arn:aws:s3:::youtube-output-videos-bucket-internetstoriesguru/*",
+                "arn:aws:s3:::done-videos-txt-bucket-internetstoriesguru/*",
+                "arn:aws:s3:::code-temp-internetstories/*"
+            ]
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": "s3:ListBucket",
+            "Resource": [
+                "arn:aws:s3:::background-videos-bucket-internetstoriesguru",
+                "arn:aws:s3:::used-bucket-background-videos-bucket-internetstoriesguru",
+                "arn:aws:s3:::output-videos-bucket-internetstoriesguru",
+                "arn:aws:s3:::youtube-output-videos-bucket-internetstoriesguru",
+                "arn:aws:s3:::done-videos-txt-bucket-internetstoriesguru/*",
+                "arn:aws:s3:::code-temp-internetstories/*"
+            ]
+        }
+    ]
+}
