@@ -81,7 +81,7 @@ Add his access key credentials to Secrets/aws_secrets.py
 
 ### GCP: Autorize application to use youtube
 
-Next you have to authorize your youtube account
+Next you have to 
 
 https://developers.google.com/youtube/v3/guides/authentication
 
@@ -99,29 +99,19 @@ AWS:
 1. Create IAM Role that will Allow EC2 instances to call AWS services on your behalf, give it the same permissions as the user above
 2. Create EC2 instance (Ubuntu 22)
 I used Canonical, Ubuntu, 22.04 LTS on eu-central-1 - ami-0ec7f9846da6b0f61
-
-
 - assign IAM user with required permissions to it
 - add startup script to the vm (AWS/aws-startup-script.sh)
 
+2. SSH to vm, authorize your youtube account to use this app
+cd /home/ubuntu/reddit-video-gen
+python 
+............. add credentials from GCP 
+....
+TODO
+# Add crontab entry for your script
+(sudo crontab -u ubuntu -l; echo "20 */8 * * * cd /home/ubuntu/reddit-video-gen && ./run.sh >> /home/ubuntu/reddit-video-gen/logs/app.log 2>&1") | sudo crontab -u ubuntu -
 
-
-1. Clone the repository:
-
-```
-git clone https://github.com/yourusername/reddit-video-generator.git
-cd reddit-video-generator
-```
-Install the required dependencies:
-
-pip install -r requirements.txt
-Install the required browser and WebDriver. In this example, we will use Firefox and geckodriver:
-
-sudo apt-get install firefox
-wget https://github.com/mozilla/geckodriver/releases/download/vX.Y.Z/geckodriver-vX.Y.Z-linux64.tar.gz
-tar -xvzf geckodriver-vX.Y.Z-linux64.tar.gz
-sudo mv geckodriver /usr/local/bin/
-Make sure to replace vX.Y.Z with the appropriate version number for geckodriver.
+.........
 
 Usage
 Edit the config.ini file to set the desired parameters for your video, such as the Reddit API credentials, video settings, and output directory.

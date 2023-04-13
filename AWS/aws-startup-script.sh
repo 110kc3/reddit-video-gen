@@ -31,9 +31,7 @@ aws s3 sync s3://code-temp-internetstories /home/ubuntu/reddit-video-gen
 
 # create the logs directory and the app.log file
 mkdir -p /home/ubuntu/reddit-video-gen/logs
-touch /home/ubuntu/logs/reddit-video-gen/app.log
-touch /home/ubuntu/logs/reddit-video-gen/env.log
+touch /home/ubuntu/reddit-video-gen/logs/app.log
+touch /home/ubuntu/reddit-video-gen/logs/env.log
 
 
-# Add crontab entry for your script
-(sudo crontab -u ubuntu -l; echo "20 */8 * * * cd /home/ubuntu/reddit-video-gen && ./run.sh >> /home/ubuntu/reddit-video-gen/logs/app.log 2>&1") | sudo crontab -u ubuntu -
