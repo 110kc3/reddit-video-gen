@@ -1,41 +1,46 @@
 # Reddit Video Generator
 
-Reddit Video Generator is a Python-based project that creates videos from top Reddit posts and their comments. 
-The project uses Selenium WebDriver for taking screenshots of the posts, 
-moviepy for video editing, and text-to-speech for generating audio from the post titles and comments.
-
-## Getting Started
-
-These instructions will help you set up the project on your local machine for development and usage purposes.
-
-### Prerequisites
-
-1. Python 3.x
-2. pip
-
-### Installation
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/yourusername/reddit-video-generator.git
-cd reddit-video-generator
-```
-
-bash
-Copy code
-# Reddit Video Generator
-
 Reddit Video Generator is a Python-based project that creates videos from top Reddit posts and their comments. The project uses Selenium WebDriver for taking screenshots of the posts, moviepy for video editing, and text-to-speech for generating audio from the post titles and comments.
 
 ## Getting Started
 
-These instructions will help you set up the project on your local machine for development and usage purposes.
+These instructions will help you set up the project on your local machine for development and usage purposes.*** not finished
 
 ### Prerequisites
 
-1. Python 3.x
-2. pip
+### For local usage
+1. Register with Reddit to create and API application [here](https://www.reddit.com/prefs/apps/)
+2. Youtube account
+3. GCP account with enabled [YouTube Data API](https://developers.google.com/youtube/v3)
+You will need to create YouTube app on GCP and then authenticate to it... you will also need client_secrets_desktop.json in order to even connect to GCP from your account.
+4. AWS account* (this is needed for the voiceover voice I used, you could swap if for something else, but I found the Joanna voice to be the best for these type of videos)
+
+### Additional for cloud usage and complete automation
+4. AWS account* - currently the code uses AWS buckets for all files handling, thus you will need to create couple of buckets on AWS. The script was tested on shitty 1gb Ubuntu VM, it can take up to an hour for a video to be generated.
+(you could use diferent provider, but aws is cheap af for this kind of project)
+
+
+### Set up your secrets
+Secrets/aws_secrets.py
+AWS_ACCESS_KEY_ID = 
+AWS_SECRET_ACCESS_KEY = 
+
+Secrets/reddit_secrets.py
+reddit_client_id=""
+reddit_client_secret=""
+reddit_user_agent="Windows10:shitty-app:v0.1 by u/you"
+
+### Autorize application to use youtube
+
+Next you have to authorize your youtube account
+
+On test setup you can use authorize_youtube.py
+
+on headless setup use authorize_youtube_headless.py
+
+It completes the OAuth 2.0 authentication flow, with the use the flow.run_console() method to authenticate with the Google API using a code that you obtain from the Google Cloud Console.
+
+
 
 ### Installation
 
@@ -99,12 +104,6 @@ echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
 
 
 ######
-Secrets:
-
-Register with Reddit to create and API application [here](https://www.reddit.com/prefs/apps/)
-
-
-
 
 
 There are some issues with libraries:
@@ -185,13 +184,32 @@ sudo apt install python3-pip
 .....
 
 
-Next you have to authorize your youtube account
 
-On test setup you can use authorize_youtube.py
 
-on headless setup use authorize_youtube_headless.py
 
-It completes the OAuth 2.0 authentication flow, with the use the flow.run_console() method to authenticate with the Google API using a code that you obtain from the Google Cloud Console.
+
+
+
+
+
+
+#
+After competing setup for youtube auto upload you can then replicate incoming videos from YT to other platforms.
+I wanted to do this via code, however it looks like to much work.
+
+I found below tool that replicates all your youtube videos to other platforms.
+
+It has 14 day trial, after that there is billing per month.
+
+If you wish to use it, consider using my referal link: https://repurpose.io/?aff=107387
+
+
+
+
+
+
+#######
+
 
 
 
