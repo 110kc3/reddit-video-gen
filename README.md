@@ -122,43 +122,9 @@ python main.py
 Alternatively, you can run `python main.py <reddit-post-id>` to create a video for a specific post.
 
 
-## Hosting
-
-If you will be using aws free tier vm for hosting you will need to create swapfile for better memory management as program can fail on only 1gb of ram.
-
-This script will create the swap file, make it persistent, and add the crontab entry (entry can be modificated) for the run.sh script. Make sure to replace the ubuntu user with the appropriate user if needed.
-
-
-```
-#!/bin/bash
-# Create a 3GB swap file (change the count to adjust the size)
-sudo dd if=/dev/zero of=/swapfile bs=1M count=3072
-# Set the appropriate permissions for the swap file
-sudo chmod 600 /swapfile
-# Set up the swap area
-sudo mkswap /swapfile
-# Enable the swap file
-sudo swapon /swapfile
-
-# Add the swap file to /etc/fstab for persistence
-echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
-
-# Add crontab entry for your script
-(sudo crontab -u ubuntu -l; echo "20 */8 * * * cd /home/ubuntu && ./run.sh >> /home/ubuntu/logs/app.log 2>&1") | sudo crontab -u ubuntu -
-
-```
-
-
 
 
 ######
-
-
-There are some issues with libraries:
-
-fix:
-
-python -m pip install -r requirements2.txt
 
 
 
