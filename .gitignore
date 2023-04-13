@@ -1,7 +1,11 @@
 __pycache__/*
 BackgroundVideos/*
 Lib/*
-Scripts_test
+Scripts_test/tiktok*
+Scripts_test/facebook*
+Scripts_test/upload*
+Scripts_test/youtube*
+
 metadata.json
 pyvenv.cfg
 client_secrets.json

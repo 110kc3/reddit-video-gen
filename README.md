@@ -1,14 +1,108 @@
 # Reddit Video Generator
 
-This program generates a .mp4 video automatically by querying the top post on the
-r/askreddit subreddit, and grabbing several comments. To use this program:
-- [ ] Install dependencies
-- [ ] Register with Reddit to create and API application [here](https://www.reddit.com/prefs/apps/)
-- [ ] Use the credentials from the previous step to update reddit.py line 46-51
-- [ ] Make a copy of config.example.ini and rename to config.ini
+Reddit Video Generator is a Python-based project that creates videos from top Reddit posts and their comments. 
+The project uses Selenium WebDriver for taking screenshots of the posts, 
+moviepy for video editing, and text-to-speech for generating audio from the post titles and comments.
 
-Now, you can run `python main.py` to be prompted for which post to choose. Alternatively,
-you can run `python main.py <reddit-post-id>` to create a video for a specific post.
+## Getting Started
+
+These instructions will help you set up the project on your local machine for development and usage purposes.
+
+### Prerequisites
+
+1. Python 3.x
+2. pip
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/reddit-video-generator.git
+cd reddit-video-generator
+```
+
+bash
+Copy code
+# Reddit Video Generator
+
+Reddit Video Generator is a Python-based project that creates videos from top Reddit posts and their comments. The project uses Selenium WebDriver for taking screenshots of the posts, moviepy for video editing, and text-to-speech for generating audio from the post titles and comments.
+
+## Getting Started
+
+These instructions will help you set up the project on your local machine for development and usage purposes.
+
+### Prerequisites
+
+1. Python 3.x
+2. pip
+
+### Installation
+
+1. Clone the repository:
+
+```
+git clone https://github.com/yourusername/reddit-video-generator.git
+cd reddit-video-generator
+```
+Create a virtual environment and activate it:
+
+python3 -m venv venv
+source venv/bin/activate
+Install the required dependencies:
+
+pip install -r requirements.txt
+Install the required browser and WebDriver. In this example, we will use Firefox and geckodriver:
+
+sudo apt-get install firefox
+wget https://github.com/mozilla/geckodriver/releases/download/vX.Y.Z/geckodriver-vX.Y.Z-linux64.tar.gz
+tar -xvzf geckodriver-vX.Y.Z-linux64.tar.gz
+sudo mv geckodriver /usr/local/bin/
+Make sure to replace vX.Y.Z with the appropriate version number for geckodriver.
+
+Usage
+Edit the config.ini file to set the desired parameters for your video, such as the Reddit API credentials, video settings, and output directory.
+
+Run the main.py script to be prompted for which post to choose.
+python main.py
+
+Alternatively, you can run `python main.py <reddit-post-id>` to create a video for a specific post.
+
+
+## Hosting
+
+If you will be using aws free tier vm for hosting you will need to create swapfile for better memory management as program can fail on only 1gb of ram.
+
+This script will create the swap file, make it persistent, and add the crontab entry (entry can be modificated) for the run.sh script. Make sure to replace the ubuntu user with the appropriate user if needed.
+
+
+```
+#!/bin/bash
+# Create a 3GB swap file (change the count to adjust the size)
+sudo dd if=/dev/zero of=/swapfile bs=1M count=3072
+# Set the appropriate permissions for the swap file
+sudo chmod 600 /swapfile
+# Set up the swap area
+sudo mkswap /swapfile
+# Enable the swap file
+sudo swapon /swapfile
+
+# Add the swap file to /etc/fstab for persistence
+echo "/swapfile none swap sw 0 0" | sudo tee -a /etc/fstab
+
+# Add crontab entry for your script
+(sudo crontab -u ubuntu -l; echo "20 */8 * * * cd /home/ubuntu && ./run.sh >> /home/ubuntu/logs/app.log 2>&1") | sudo crontab -u ubuntu -
+
+```
+
+
+
+
+######
+Secrets:
+
+Register with Reddit to create and API application [here](https://www.reddit.com/prefs/apps/)
+
 
 
 
@@ -60,6 +154,46 @@ IAM policy should look like this:
         }
     ]
 }
+
+
+
+
+
+
+
+
+
+AWS linux vm: (when code is in bucket - TODO change)
+
+
+Install the AWS CLI tool on your Ubuntu VM. You can do this by running the following command:
+
+sudo apt-get update && sudo apt-get install awscli -y
+Once the AWS CLI tool is installed, you need to configure it with your AWS credentials. You can do this by running the following command and following the prompts:
+
+aws configure
+
+NOTE: (better to use IAM roles) IAM roles: You can assign an IAM role to the instance when launching it. The IAM role should have the necessary permissions to access the S3 bucket. The AWS CLI and SDKs can automatically retrieve the credentials from the instance metadata service, so you don't need to provide credentials explicitly.
+
+After the CLI tool is configured, you can use the following command to sync all the files from the S3 bucket to a local directory on your Ubuntu VM:
+aws s3 sync s3://code-temp-internetstories .
+
+
+sudo apt install python3-pip
+
+
+.....
+
+
+Next you have to authorize your youtube account
+
+On test setup you can use authorize_youtube.py
+
+on headless setup use authorize_youtube_headless.py
+
+It completes the OAuth 2.0 authentication flow, with the use the flow.run_console() method to authenticate with the Google API using a code that you obtain from the Google Cloud Console.
+
+
 
 
 
