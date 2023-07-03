@@ -1,3 +1,6 @@
+## Note: with new chages of reddit API this is now unmaintained
+
+
 # Reddit Video Generator
 
 Reddit Video Generator is a Python-based project that creates videos from top Reddit posts and their comments. The project uses Selenium WebDriver for taking screenshots of the posts, moviepy for video editing, and text-to-speech for generating audio from the post titles and comments.
